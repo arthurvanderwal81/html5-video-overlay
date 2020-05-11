@@ -1,0 +1,203 @@
+<html>
+    <head>
+        <title>HTML5 Video - Thumbnail overlay</title>
+        <style>
+
+            body
+            {
+                background-color: #aaa;
+            }
+
+            video
+            {
+                width: 100%;
+                height: 100%;
+            }
+
+            .container
+            {
+                margin: 0 auto;
+                width: 70%;
+            }
+
+            .video-container
+            {
+                width: 100%;
+                height: 1000px;
+                position: relative;
+            }
+
+            .absolute-div
+            {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            .overlay
+            {
+                z-index: -1;
+            }
+
+            .flex-container
+            {
+                display: flex;
+                justify-content: center;
+            }
+
+            .overlay-element
+            {
+                opacity: 0;
+                width: 50%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .overlay-element > img
+            {
+                width: 70%;
+                height: 70%;
+                cursor: pointer;
+            }
+
+        </style>
+
+        <script type="text/javascript">
+
+            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/
+
+            function setOverlayElementsOpacity(opacity)
+            {
+                let overlayElements = document.querySelectorAll(".overlay-element");
+
+                for (let i = 0; i < overlayElements.length; i++)
+                {
+                    overlayElements[i].style.opacity = opacity.toString();
+                }
+            }
+
+            let overlayFadeInOpacity = 0.0;
+            let overlayFadeHandle = null;
+
+            function fadeOutOverlayElements()
+            {
+                overlayFadeInOpacity = 1.0;
+
+                overlayFadeHandle = setInterval(function() {
+                    setOverlayElementsOpacity(overlayFadeInOpacity);
+                    overlayFadeInOpacity -= 0.1;
+
+                    if (overlayFadeInOpacity < 0.0)
+                    {
+                        clearInterval(overlayFadeHandle);
+                        overlayFadeHandle = null;
+
+                        let overlayElement = document.querySelector(".overlay");
+                        overlayElement.style.zIndex = -1;
+                    }
+                }, 20);
+            }
+
+            function fadeInOverlayElements()
+            {
+                let overlayElement = document.querySelector(".overlay");
+                overlayElement.style.zIndex = 1;
+
+                overlayFadeHandle = setInterval(function() {
+                    setOverlayElementsOpacity(overlayFadeInOpacity);
+                    overlayFadeInOpacity += 0.1;
+
+                    if (overlayFadeInOpacity > 1.0)
+                    {
+                        clearInterval(overlayFadeHandle);
+                        overlayFadeHandle = null;
+                    }
+                }, 20);
+            }
+
+            window.addEventListener("load", function() {
+                let videoElement = document.querySelector("video");
+
+                videoElement.addEventListener("click", function(e) {
+                    if (this.paused)
+                    {
+                        this.play();
+                    }
+                    else
+                    {
+                        this.pause();
+                    }
+                });
+
+                let thumbNailElements = document.querySelectorAll(".overlay-element > img");
+
+                for (let i = 0; i < thumbNailElements.length; i++)
+                {
+                    thumbNailElements[i].addEventListener("click", function() {
+
+                        fadeOutOverlayElements();
+
+                        let videoElement = document.querySelector("video");
+
+                        videoElement.currentTime = 0.0;
+                        videoElement.play();
+                    });
+                }
+
+                videoElement.addEventListener("timeupdate", function(e) {
+                    console.log(this.currentTime);
+                    console.log("Video duration: " + this.duration);
+
+                    let timeToEnd = this.duration - this.currentTime;
+
+                    if (timeToEnd <= 1.0 && overlayFadeHandle == null)
+                    {
+                        fadeInOverlayElements();
+                    }
+                });
+
+                videoElement.addEventListener("ended", function(e) {
+                    console.log("Video ended");
+                });
+            })
+        </script>
+    </head>
+
+    <body>
+
+        <div class="container">
+            <div class="video-container">
+                <div class="absolute-div" style="z-index: 0;">
+                    <video src="http://techslides.com/demos/sample-videos/small.mp4"></video>
+                </div>
+                <!--
+                <div class="absolute-div overlay flex-container">
+                    <img src="img/play.png" />
+                </div>
+                -->
+                <div class="absolute-div overlay">
+                    <div class="flex-container" style="height: 50%;">
+                        <div class="overlay-element">
+                            <img alt="Thumbnail 1 Link" title="Thumbnail 1 Link" src="https://images.squarespace-cdn.com/content/v1/559f08d7e4b07a1d6a29f0de/1541783289182-T4H1C2E69REMC6Z9460F/ke17ZwdGBToddI8pDm48kBdaEgjlJHgZ4GdB_hjsRNJ7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UX2ZxVsGsuPfsKE5TZjcz60FTWZukRYVpV3dcdoOtxIaJ1-7fBEtYAcEyBOMpwO3KA/square+cat.jpg" />
+                        </div>
+                        <div class="overlay-element">
+                            <img alt="Thumbnail 2 Link" title="Thumbnail 2 Link" src="https://images.squarespace-cdn.com/content/v1/559f08d7e4b07a1d6a29f0de/1541783289182-T4H1C2E69REMC6Z9460F/ke17ZwdGBToddI8pDm48kBdaEgjlJHgZ4GdB_hjsRNJ7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UX2ZxVsGsuPfsKE5TZjcz60FTWZukRYVpV3dcdoOtxIaJ1-7fBEtYAcEyBOMpwO3KA/square+cat.jpg" />
+                        </div>
+                    </div>
+                    <div class="flex-container" style="height: 50%;">
+                        <div class="overlay-element">
+                            <img alt="Thumbnail 3 Link" title="Thumbnail 3 Link" src="https://images.squarespace-cdn.com/content/v1/559f08d7e4b07a1d6a29f0de/1541783289182-T4H1C2E69REMC6Z9460F/ke17ZwdGBToddI8pDm48kBdaEgjlJHgZ4GdB_hjsRNJ7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UX2ZxVsGsuPfsKE5TZjcz60FTWZukRYVpV3dcdoOtxIaJ1-7fBEtYAcEyBOMpwO3KA/square+cat.jpg" />
+                        </div>
+                        <div class="overlay-element">
+                            <img alt="Thumbnail 4 Link" title="Thumbnail 4 Link" src="https://images.squarespace-cdn.com/content/v1/559f08d7e4b07a1d6a29f0de/1541783289182-T4H1C2E69REMC6Z9460F/ke17ZwdGBToddI8pDm48kBdaEgjlJHgZ4GdB_hjsRNJ7gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QPOohDIaIeljMHgDF5CVlOqpeNLcJ80NK65_fV7S1UX2ZxVsGsuPfsKE5TZjcz60FTWZukRYVpV3dcdoOtxIaJ1-7fBEtYAcEyBOMpwO3KA/square+cat.jpg" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
